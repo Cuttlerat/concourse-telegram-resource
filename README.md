@@ -43,6 +43,10 @@ jobs:
 ```
 ### Example message
 **Pipeline:** test
+
 **Job:** Test task
+
 **Build number:** 1
+
 **Message:** Build success
+
