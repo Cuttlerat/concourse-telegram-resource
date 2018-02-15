@@ -2,7 +2,7 @@
 Telegram notification resource for [ConcourseCI](https://github.com/concourse/concourse)
 
 ## Config
-* `bot`: **Required** Bot token, for example `123456789:ABCDEFGHIJKLMNOPQRSTUVWQYZabcdefghi`
+* `bot_token`: **Required** Bot token, for example `123456789:ABCDEFGHIJKLMNOPQRSTUVWQYZabcdefghi`
 * `chat_id`: **Required** Chat id
 
 ### Example
@@ -16,7 +16,7 @@ resource_types:
 
 resources:
 - name: telegram
-  type: bot
+  type: telegram-notification
   source:
     bot: ((telegram_bot_token))
     chat_id: ((telegram_chat_id))
