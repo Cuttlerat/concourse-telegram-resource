@@ -42,11 +42,7 @@ jobs:
               exit 0
 ```
 ### Example message
-**Pipeline:** test
-
-**Job:** Test task
-
-**Build number:** 1
-
-**Message:** Build success
-
+**Pipeline:** test  
+**Job:** Test task  
+**Build number:** 1  
+**Message:** Build success  
