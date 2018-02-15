@@ -22,5 +22,5 @@ OUTPUT_STRING='{ "version": { "ref": "none"} }'
 echo "${OUTPUT_STRING}"
 
 # Exit status
-grep -q '"ok":true' <<<"${RESPONSE}" || exit 1
+#grep -q '"ok":true' <<<"${RESPONSE}" || exit 1
 
