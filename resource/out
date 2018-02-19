@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set -e
+
+exec 3>&1
+exec 1>&2
+
 INPUT='/tmp/input'
 OUTPUT='/tmp/output'
 
@@ -9,18 +14,16 @@ cat > "${INPUT}" <&0
 
 BOT_TOKEN=$(jq -r '.source.bot_token // ""' <"${INPUT}")
 CHAT_ID=$(jq -r '.source.chat_id // ""' <"${INPUT}")
+CI_URL=$(jq -r '.source.ci_url // ""' <"${INPUT}" )
 MESSAGE=$(jq -r '.params.message // ""' <"${INPUT}")
+BUILD_URL="${CI_URL:=$ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
 
 RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
                 -d "chat_id=${CHAT_ID}" \
-                -d "text=<b>${MESSAGE}</b>%0A<b>Pipeline: </b>${BUILD_PIPELINE_NAME}%0A<b>Job: </b>${BUILD_JOB_NAME}%0A<b>Build number: </b>${BUILD_NAME}" \
+                -d "text=<b>${MESSAGE}</b>%0A<b>URL:</b> ${BUILD_URL}%0A<b>Pipeline: </b>${BUILD_PIPELINE_NAME}%0A<b>Job: </b>${BUILD_JOB_NAME}%0A<b>Build number: </b>${BUILD_NAME}" \
                 -d "parse_mode=html")
 
-jq -r '. // ""' <<<"${RESPONSE}" 1>&2
+jq -r '. // ""' <<<"${RESPONSE}"
 
 OUTPUT_STRING='{ "version": { "ref": "none"} }'
-echo "${OUTPUT_STRING}"
-
-# Exit status
-#grep -q '"ok":true' <<<"${RESPONSE}" || exit 1
-
+echo "${OUTPUT_STRING}" >&3

@@ -4,6 +4,7 @@ Telegram notification resource for [ConcourseCI](https://github.com/concourse/co
 ## Config
 * `bot_token`: **Required** Bot token, for example `123456789:ABCDEFGHIJKLMNOPQRSTUVWQYZabcdefghi`
 * `chat_id`: **Required** Chat id
+* `ci_url`: URL of your ci, if not defined will be used from `$ATC_EXTERNAL_URL`
 
 ### Example
 ```
