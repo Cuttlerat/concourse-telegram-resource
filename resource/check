@@ -1,4 +1,13 @@
 #!/bin/sh
 
-echo "[]"
-exit 0
+set -e
+
+exec 3>&1 1>&2
+
+INPUT='/tmp/input'
+cat > "${INPUT}" <&0 
+
+BOT_TOKEN=$(jq -r '.source.bot_token // ""' <"${INPUT}")
+FILTER=$(jq -r '.source.command // ""' <"${INPUT}")
+
+curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" | jq '[ .result[] | select(.message.text | contains  ("'"${FILTER}"'")) | {ref: .message.message_id|tostring} ]' >&3
