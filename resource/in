@@ -15,12 +15,12 @@ ADMINS=$(   jq -r '.source.admins    // []' "${INPUT}")
 
 curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" > "${RESPONSE}"
 jq "[ .result[] |
-      select(  .message.text           | contains (\"${COMMAND}\"))  |
-      select(  .message.chat.id        | contains (  ${CHAT_ID}  ))  |
-      select( [.message.from.username] | inside   (  ${ADMINS}   ))  |
-      .message.message_id|tostring // \"none\"                       |
-      { ref: . } ]                                                   |
-      { version: .[-1] }"                                            \
+      select(  .message.text | tostring | contains (\"${COMMAND}\"))  |
+      select(  .message.chat.id         | contains (  ${CHAT_ID}  ))  |
+      select( [.message.from.username]  | inside   (  ${ADMINS}   ))  |
+      .message.message_id | tostring // \"none\"                      |
+      { ref: . } ]                                                    |
+      { version: .[-1] }"                                             \
       "${RESPONSE}" >&3
 
 LAST_UPDATEID=$(jq -r '.result[-1].update_id // ""' "${RESPONSE}")
