@@ -5,9 +5,18 @@ set -e
 exec 3>&1 1>&2
 
 INPUT='/tmp/input'
+RESPONSE='/tmp/response'
 cat > "${INPUT}" <&0 
 
 BOT_TOKEN=$(jq -r '.source.bot_token // ""' <"${INPUT}")
-FILTER=$(jq -r '.source.command // ""' <"${INPUT}")
+COMMAND=$(  jq -r '.source.command   // ""' <"${INPUT}")
+CHAT_ID=$(  jq -r '.source.chat_id   // ""' <"${INPUT}")
+ADMINS=$(   jq -r '.source.admins    // ""' <"${INPUT}")
 
-curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" | jq '[ .result[] | select(.message.text | contains ("'"${FILTER}"'")) | {ref: .message.message_id|tostring} ] | { version: .[-1] } ' >&3
+curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" > "${RESPONSE}"
+jq "[ .result[] |
+     select(  .message.text           | contains (\"${COMMAND}\"))  |
+     select(  .message.chat.id        | contains (  ${CHAT_ID}  ))  |
+     select( [.message.from.username] | inside   (  ${ADMINS}   ))  |
+     {ref: .message.message_id|tostring} ] | { version: .[-1] }"    \
+     "${RESPONSE}" >&3
