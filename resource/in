@@ -8,10 +8,10 @@ INPUT='/tmp/input'
 RESPONSE='/tmp/response'
 cat > "${INPUT}" <&0 
 
-BOT_TOKEN=$(jq -r '.source.bot_token // ""' <"${INPUT}")
-COMMAND=$(  jq -r '.source.command   // ""' <"${INPUT}")
-CHAT_ID=$(  jq -r '.source.chat_id   // ""' <"${INPUT}")
-ADMINS=$(   jq -r '.source.admins    // ""' <"${INPUT}")
+BOT_TOKEN=$(jq -r '.source.bot_token // ""' "${INPUT}")
+COMMAND=$(  jq -r '.source.command   // ""' "${INPUT}")
+CHAT_ID=$(  jq -r '.source.chat_id   // ""' "${INPUT}")
+ADMINS=$(   jq -r '.source.admins    // ""' "${INPUT}")
 
 curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" > "${RESPONSE}"
 jq "[ .result[] |
@@ -20,3 +20,9 @@ jq "[ .result[] |
      select( [.message.from.username] | inside   (  ${ADMINS}   ))  |
      {ref: .message.message_id|tostring} ] | { version: .[-1] }"    \
      "${RESPONSE}" >&3
+
+LAST_UPDATEID=$(jq -r '.result[-1].update_id // ""' "${RESPONSE}")
+
+curl -s "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" \
+     --data "offset=$((${LAST_UPDATEID}))" \
+     -o /dev/null
