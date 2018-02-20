@@ -11,12 +11,13 @@ cat > "${INPUT}" <&0
 BOT_TOKEN=$(jq -r '.source.bot_token // ""' "${INPUT}")
 COMMAND=$(  jq -r '.source.command   // ""' "${INPUT}")
 CHAT_ID=$(  jq -r '.source.chat_id   // ""' "${INPUT}")
-ADMINS=$(   jq -r '.source.admins    // ""' "${INPUT}")
+ADMINS=$(   jq -r '.source.admins    // []' "${INPUT}")
 
 curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" > "${RESPONSE}"
 jq "[ .result[] |
-     select(  .message.text           | contains (\"${COMMAND}\"))  |
-     select(  .message.chat.id        | contains (  ${CHAT_ID}  ))  |
-     select( [.message.from.username] | inside   (  ${ADMINS}   ))  |
-     {ref: .message.message_id|tostring} ]"                         \
-     "${RESPONSE}" >&3
+      select(  .message.text           | contains (\"${COMMAND}\"))  |
+      select(  .message.chat.id        | contains (  ${CHAT_ID}  ))  |
+      select( [.message.from.username] | inside   (  ${ADMINS}   ))  |
+      .message.message_id|tostring // \"none\"                       |
+      { ref: . } ]"                                                  \
+      "${RESPONSE}" >&3
