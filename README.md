@@ -5,6 +5,8 @@ Telegram notification resource for [ConcourseCI](https://github.com/concourse/co
 * `bot_token`: **Required** Bot token, for example `123456789:ABCDEFGHIJKLMNOPQRSTUVWQYZabcdefghi`
 * `chat_id`: **Required** Chat id
 * `ci_url`: URL of your ci, if not defined will be used from `$ATC_EXTERNAL_URL`
+* `admins`: Array of usernames (without @) who can use command for trigger job
+* `command`: **Required for get** command which will trigger job, example `/build`
 
 ### Example
 ```
@@ -21,15 +23,20 @@ resources:
   source:
     bot: ((telegram_bot_token))
     chat_id: ((telegram_chat_id))
+    ci_url: "http://example.com"
+    admins: ((telegram_admins))
+    command: "/build"
 
 jobs:
-- name: Test task
+- name: test_task
   plan:
+  - get: telegram
+    trigger: true
   - task: Send message
     on_success:
       put: telegram
       params:
-        message: Build success
+        message: Build successful
     config:
       platform: linux
       image_resource:
@@ -42,8 +49,13 @@ jobs:
           - |
               exit 0
 ```
-### Example message
+
+### Example command for trigger
+`/build`
+
+### Example output message
+**URL:** http://example.com/teams/main/pipelines/test/jobs/test_task/builds/1  
 **Pipeline:** test  
-**Job:** Test task  
+**Job:** test_task  
 **Build number:** 1  
-**Message:** Build success  
+**Message:** Build successful  
