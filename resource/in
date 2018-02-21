@@ -26,5 +26,5 @@ jq "[ .result[] |
 LAST_UPDATEID=$(jq -r '.result[-1].update_id // ""' "${RESPONSE}")
 
 curl -s "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" \
-     --data "offset=$((${LAST_UPDATEID}))" \
+     --data "offset=$((${LAST_UPDATEID}-9))" \
      -o /dev/null
