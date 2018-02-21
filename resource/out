@@ -8,7 +8,6 @@ INPUT='/tmp/input'
 OUTPUT='/tmp/output'
 
 # write STDIN to file
-#{"source":{"bot":"","chat_id":""},"params":{"message":""}}
 cat > "${INPUT}" <&0 
 
 BOT_TOKEN=$(jq -r '.source.bot_token // ""' <"${INPUT}")
