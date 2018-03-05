@@ -14,14 +14,41 @@ CHAT_ID=$(  jq -r '.source.chat_id   // ""' "${INPUT}")
 ADMINS=$(   jq -r '.source.admins    // []' "${INPUT}")
 
 curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" > "${RESPONSE}"
+
+SENDER=$(jq -r "[ .result[] |
+    select(  .message.text | tostring   | contains (\"${COMMAND}\"))  |
+    select(  .message.chat.id           | contains (  ${CHAT_ID}  ))  |
+    select( [.message.from.username]    | inside   (  ${ADMINS}   ))  |
+    .message.from.username // \"none\"  | { sender: . } ] | .[-1]     |
+    .sender " "${RESPONSE}")
+CHAT_TITLE=$(jq -r "[ .result[] |
+    select(  .message.text | tostring   | contains (\"${COMMAND}\"))  |
+    select(  .message.chat.id           | contains (  ${CHAT_ID}  ))  |
+    select( [.message.from.username]    | inside   (  ${ADMINS}   ))  |
+    .message.chat.title // \"none\"     | { chat_title: . } ] | .[-1] |
+    .chat_title " "${RESPONSE}")
+COMMAND_ARGS=$(jq -r "[ .result[] |
+    select(  .message.text | tostring   | contains (\"${COMMAND}\"))  |
+    select(  .message.chat.id           | contains (  ${CHAT_ID}  ))  |
+    select( [.message.from.username]    | inside   (  ${ADMINS}   ))  |
+    { command: .message.text } ]        | .[-1]                       |
+    .command " "${RESPONSE}"            | sed 's/^[^ ]\+ *//'         )
+
 jq "[ .result[] |
       select(  .message.text | tostring | contains (\"${COMMAND}\"))  |
       select(  .message.chat.id         | contains (  ${CHAT_ID}  ))  |
       select( [.message.from.username]  | inside   (  ${ADMINS}   ))  |
       .message.message_id | tostring // \"none\"                      |
       { ref: . } ]                                                    |
-      { version: .[-1] }"                                             \
-      "${RESPONSE}" >&3
+      { version: .[-1],
+        metadata: [
+         { name: \"command\",    value: \"${COMMAND}\"    },
+         { name: \"chat_title\", value: \"${CHAT_TITLE}\" },
+         { name: \"sender\",     value: \"${SENDER}\"     }
+        ]
+      }" "${RESPONSE}" >&3
+
+[[ $1 != "" ]] && [[ "${COMMAND_ARGS}" != "" ]] && echo "${COMMAND_ARGS}" > $1/input_command
 
 LAST_UPDATEID=$(jq -r '.result[-1].update_id // ""' "${RESPONSE}")
 
