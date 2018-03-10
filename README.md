@@ -12,7 +12,7 @@ Telegram notification resource for [ConcourseCI](https://github.com/concourse/co
 You can use `input` to get args from a command sent to a bot.
 All args will be stored in `<resourse_name>/input_command`
 
-### Example
+## Example
 ```
 resource_types:
 - name: telegram-notification
