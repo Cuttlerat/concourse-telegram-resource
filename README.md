@@ -2,11 +2,11 @@
 Telegram notification resource for [ConcourseCI](https://github.com/concourse/concourse)
 
 ## Config
-`bot_token`: **Required** Bot token, for example `123456789:ABCDEFGHIJKLMNOPQRSTUVWQYZabcdefghi`
-`chat_id`: **Required** Chat id
-`ci_url`: URL of your CI, if not defined will be used from `$ATC_EXTERNAL_URL`
-`command`: **Required for get** Command which will trigger a job, for example `/build`
-`admins`: **Required for get** Array of usernames (without @) who can use a command to trigger job
+* `bot_token`: **Required** Bot token, for example `123456789:ABCDEFGHIJKLMNOPQRSTUVWQYZabcdefghi`
+* `chat_id`: **Required** Chat id
+* `ci_url`: URL of your CI, if not defined will be used from `$ATC_EXTERNAL_URL`
+* `command`: **Required for get** Command which will trigger a job, for example `/build`
+* `admins`: **Required for get** Array of usernames (without @) who can use a command to trigger job
 
 ## Input
 You can use `input` to get args from a command sent to a bot.
