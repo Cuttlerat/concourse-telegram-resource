@@ -60,7 +60,7 @@ jobs:
 `/build`
 
 ### Example output message
-**URL:** http://example.com/teams/main/pipelines/test/jobs/test_task/builds/1  
+**URL:** [Link](http://example.com/teams/main/pipelines/test/jobs/test_task/builds/1)  
 **Pipeline:** test  
 **Job:** test_task  
 **Build number:** 1  
