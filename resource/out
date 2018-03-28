@@ -16,6 +16,10 @@ CI_URL=$(   jq -r '.source.ci_url    // ""' "${INPUT}")
 MESSAGE=$(  jq -r '.params.message   // ""' "${INPUT}")
 BUILD_URL="${CI_URL:=$ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
 
+ERROR_MSG="Is not defined"
+[[ "${BOT_TOKEN:?$ERROR_MSG}" ]]
+[[ "${CHAT_ID:?$ERROR_MSG}"   ]]
+
 OUT_MESSAGE=$( cat <<EOF
 <b>${MESSAGE}</b>
 <b>URL:</b> <a href="${BUILD_URL}">Link</a>

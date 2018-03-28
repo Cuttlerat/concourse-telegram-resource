@@ -2,15 +2,18 @@
 Telegram notification resource for [ConcourseCI](https://github.com/concourse/concourse)
 
 ## Config
+**Source:**
 * `bot_token`: **Required** Bot token, for example `123456789:ABCDEFGHIJKLMNOPQRSTUVWQYZabcdefghi`
 * `chat_id`: **Required** Chat id
 * `ci_url`: URL of your CI, if not defined will be used from `$ATC_EXTERNAL_URL`
 * `command`: **Required for get** Command which will trigger a job, for example `/build`
-* `admins`: **Required for get** Array of usernames (without @) who can use a command to trigger job
+* `admins`: Array of usernames (without @) who can use a command to trigger job, if not defined all users will be able to trigger a job 
+**Params:**
+* `message`: Message which will send with build info
 
 ## Input
 You can use `input` to get args from a command sent to a bot.
-All args will be stored in `<resourse_name>/input_command`
+All args will be stored in `<resourse_name>/input_args`
 
 ## Example
 ```
@@ -25,7 +28,7 @@ resources:
 - name: telegram
   type: telegram-notification
   source:
-    bot: ((telegram_bot_token))
+    bot_token: ((telegram_bot_token))
     chat_id: ((telegram_chat_id))
     ci_url: "http://example.com"
     admins: ((telegram_admins))
@@ -53,7 +56,7 @@ jobs:
         args:
           - -exc
           - |
-              cat telegram/input_command
+             [[ -f telegram/input_args ]] && cat telegram/input_args || exit 0
 ```
 
 ### Example command for trigger

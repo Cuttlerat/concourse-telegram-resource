@@ -13,42 +13,55 @@ COMMAND=$(  jq -r '.source.command   // ""' "${INPUT}")
 CHAT_ID=$(  jq -r '.source.chat_id   // ""' "${INPUT}")
 ADMINS=$(   jq -r '.source.admins    // []' "${INPUT}")
 
+ERROR_MSG="is not defined"
+[[ "${BOT_TOKEN:?$ERROR_MSG}" ]]
+[[ "${CHAT_ID:?$ERROR_MSG}"   ]]
+[[ "${COMMAND}" ]] || echo "[Warning] Command $ERROR_MSG}"
+
+CHAT_ID_CHECK="select( .message.chat.id | contains(${CHAT_ID})) |"
+if [[ "${ADMINS}" == "[]" ]]; then
+    ADMINS_CHECK=""
+else
+    ADMINS_CHECK="select( [.message.from.username] | inside(${ADMINS})) |"
+fi
+COMMAND_CHECK="select( .message.text | tostring | contains(\"${COMMAND}\")) |"
+
 curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" > "${RESPONSE}"
 
 SENDER=$(jq -r "[ .result[] |
-    select(  .message.text | tostring   | contains (\"${COMMAND}\"))  |
-    select(  .message.chat.id           | contains (  ${CHAT_ID}  ))  |
-    select( [.message.from.username]    | inside   (  ${ADMINS}   ))  |
-    .message.from.username // \"none\"  | { sender: . } ] | .[-1]     |
-    .sender " "${RESPONSE}")
+    ${CHAT_ID_CHECK}
+    ${ADMINS_CHECK}
+    ${COMMAND_CHECK}
+    .message.from.username // \"none\" | { sender: . } ] | .[-1] |
+    .sender" "${RESPONSE}")
 CHAT_TITLE=$(jq -r "[ .result[] |
-    select(  .message.text | tostring   | contains (\"${COMMAND}\"))  |
-    select(  .message.chat.id           | contains (  ${CHAT_ID}  ))  |
-    select( [.message.from.username]    | inside   (  ${ADMINS}   ))  |
-    .message.chat.title // \"none\"     | { chat_title: . } ] | .[-1] |
-    .chat_title " "${RESPONSE}")
+    ${CHAT_ID_CHECK}
+    ${ADMINS_CHECK}
+    ${COMMAND_CHECK}
+    .message.chat.title // \"none\" | { chat_title: . } ] | .[-1] |
+    .chat_title" "${RESPONSE}")
 COMMAND_ARGS=$(jq -r "[ .result[] |
-    select(  .message.text | tostring   | contains (\"${COMMAND}\"))  |
-    select(  .message.chat.id           | contains (  ${CHAT_ID}  ))  |
-    select( [.message.from.username]    | inside   (  ${ADMINS}   ))  |
-    { command: .message.text } ]        | .[-1]                       |
-    .command " "${RESPONSE}"            | sed 's/^[^ ]\+ *//'         )
+    ${CHAT_ID_CHECK}
+    ${ADMINS_CHECK}
+    ${COMMAND_CHECK}
+    { command: .message.text } ] | .[-1] |
+    .command" "${RESPONSE}" | sed 's/^[^ ]\+ *//')
 
 jq "[ .result[] |
-      select(  .message.text | tostring | contains (\"${COMMAND}\"))  |
-      select(  .message.chat.id         | contains (  ${CHAT_ID}  ))  |
-      select( [.message.from.username]  | inside   (  ${ADMINS}   ))  |
-      .message.message_id | tostring // \"none\"                      |
-      { ref: . } ]                                                    |
-      { version: .[-1],
-        metadata: [
-         { name: \"command\",    value: \"${COMMAND}\"    },
-         { name: \"chat_title\", value: \"${CHAT_TITLE}\" },
-         { name: \"sender\",     value: \"${SENDER}\"     }
-        ]
-      }" "${RESPONSE}" >&3
+    ${CHAT_ID_CHECK}
+    ${ADMINS_CHECK}
+    ${COMMAND_CHECK}
+    .message.message_id | tostring // \"none\" |
+    { ref: . } ] |
+    { version: .[-1],
+      metadata: [
+       { name: \"command\",    value: \"${COMMAND}\"    },
+       { name: \"chat_title\", value: \"${CHAT_TITLE}\" },
+       { name: \"sender\",     value: \"${SENDER}\"     }
+      ]
+    }" "${RESPONSE}" >&3
 
-[[ $1 != "" ]] && [[ "${COMMAND_ARGS}" != "" ]] && echo "${COMMAND_ARGS}" > $1/input_command
+[[ $1 != "" ]] && [[ "${COMMAND_ARGS}" != "" ]] && echo "${COMMAND_ARGS}" > $1/input_args
 
 LAST_UPDATEID=$(jq -r '.result[-1].update_id // ""' "${RESPONSE}")
 

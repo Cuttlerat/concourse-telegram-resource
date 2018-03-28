@@ -13,12 +13,24 @@ COMMAND=$(  jq -r '.source.command   // ""' "${INPUT}")
 CHAT_ID=$(  jq -r '.source.chat_id   // ""' "${INPUT}")
 ADMINS=$(   jq -r '.source.admins    // []' "${INPUT}")
 
+ERROR_MSG="Is not defined"
+[[ "${BOT_TOKEN:?$ERROR_MSG}" ]]
+[[ "${CHAT_ID:?$ERROR_MSG}"   ]]
+[[ "${COMMAND}" ]] || echo "[Warning] Command $ERROR_MSG"
+
+CHAT_ID_CHECK="select( .message.chat.id | contains(${CHAT_ID})) |"
+if [[ "${ADMINS}" == "[]" ]]; then
+    ADMINS_CHECK=""
+else
+    ADMINS_CHECK="select( [.message.from.username] | inside(${ADMINS})) |"
+fi
+COMMAND_CHECK="select( .message.text | tostring | contains(\"${COMMAND}\")) |"
+
 curl -s -X GET "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" > "${RESPONSE}"
 jq "[ .result[] |
-      select(  .message.text | tostring | contains (\"${COMMAND}\"))  |
-      select(  .message.chat.id         | contains (  ${CHAT_ID}  ))  |
-      select( [.message.from.username]  | inside   (  ${ADMINS}   ))  |
-      .message.message_id | tostring // \"none\"                      |
-      { ref: . } ]"                                                   \
-      "${RESPONSE}" >&3
+      ${CHAT_ID_CHECK}
+      ${ADMINS_CHECK}
+      ${COMMAND_CHECK}
+      .message.message_id | tostring // \"none\" |
+      { ref: . } ]" "${RESPONSE}" >&3
 
