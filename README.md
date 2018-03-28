@@ -8,6 +8,7 @@ Telegram notification resource for [ConcourseCI](https://github.com/concourse/co
 * `ci_url`: URL of your CI, if not defined will be used from `$ATC_EXTERNAL_URL`
 * `command`: **Required for get** Command which will trigger a job, for example `/build`
 * `admins`: Array of usernames (without @) who can use a command to trigger job, if not defined all users will be able to trigger a job 
+
 **Params:**
 * `message`: Message which will send with build info
 
