@@ -16,7 +16,7 @@ ADMINS=$(   jq -r '.source.admins    // []' "${INPUT}")
 ERROR_MSG="is not defined"
 [[ "${BOT_TOKEN:?$ERROR_MSG}" ]]
 [[ "${CHAT_ID:?$ERROR_MSG}"   ]]
-[[ "${COMMAND}" ]] || echo "[Warning] Command $ERROR_MSG}"
+[[ "${COMMAND}" ]] || echo "[Warning] Command $ERROR_MSG"
 
 CHAT_ID_CHECK="select( .message.chat.id | contains(${CHAT_ID})) |"
 if [[ "${ADMINS}" == "[]" ]]; then
