@@ -2,6 +2,7 @@
 
 set -e
 
+cd $1
 exec 3>&1 1>&2
 
 INPUT='/tmp/input'
@@ -10,10 +11,12 @@ OUTPUT='/tmp/output'
 # write STDIN to file
 cat > "${INPUT}" <&0 
 
-BOT_TOKEN=$(jq -r '.source.bot_token // ""' "${INPUT}")
-CHAT_ID=$(  jq -r '.source.chat_id   // ""' "${INPUT}")
-CI_URL=$(   jq -r '.source.ci_url    // ""' "${INPUT}")
-MESSAGE=$(  jq -r '.params.message   // ""' "${INPUT}")
+BOT_TOKEN=$(    jq -r '.source.bot_token      // ""' "${INPUT}")
+CHAT_ID=$(      jq -r '.source.chat_id        // ""' "${INPUT}")
+CI_URL=$(       jq -r '.source.ci_url         // ""' "${INPUT}")
+MESSAGE=$(      jq -r '.params.message        // ""' "${INPUT}")
+MESSAGE_FILE=$( jq -r '.params.message_file   // ""' "${INPUT}")
+[[ -f "${MESSAGE_FILE}" ]] && MESSAGE="$(sed "s/{}/$(cat "${MESSAGE_FILE}")/g" <<< "${MESSAGE}")" 
 BUILD_URL="${CI_URL:=$ATC_EXTERNAL_URL}/teams/${BUILD_TEAM_NAME}/pipelines/${BUILD_PIPELINE_NAME}/jobs/${BUILD_JOB_NAME}/builds/${BUILD_NAME}"
 
 ERROR_MSG="Is not defined"

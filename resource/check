@@ -33,4 +33,3 @@ jq "[ .result[] |
       ${COMMAND_CHECK}
       .message.message_id | tostring // \"none\" |
       { ref: . } ]" "${RESPONSE}" >&3
-
