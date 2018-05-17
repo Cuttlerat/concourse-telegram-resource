@@ -56,7 +56,7 @@ jq "[ .result[] |
     { version: .[-1],
       metadata: [
        { name: \"command\",    value: \"${COMMAND}\"    },
-       { name: \"chat_title\", value: \"${CHAT_TITLE}\" },
+       { name: \"chat_title\", value: \"${CHAT_TITLE//\"/\\\"}\" },
        { name: \"sender\",     value: \"${SENDER}\"     }
       ]
     }" "${RESPONSE}" >&3

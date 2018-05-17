@@ -13,7 +13,7 @@ Telegram notification resource for [ConcourseCI](https://github.com/concourse/co
 * `message`: Message which will send with build info
 
 ## Input
-You can use `input` to get args from a command sent to a bot.
+You can use `input` to get args from a command sent to bot.
 All args will be stored in `<resourse_name>/input_args`
 
 ## Example
